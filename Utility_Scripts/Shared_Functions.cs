@@ -35,19 +35,19 @@ namespace CXAPortal.Utility_Scripts
         public static ExtentReports extent;
         public static ExtentTest extentTest;
         public string screenshotpic;
-        public static void CXALogin(String URL, String CompanyId, String Uname, String Pwd, String browser, String Client)
+        public static void CXALogin(string URL, string CompanyId, string Uname, string Pwd, string browser, string Client)
         {
             try
             {
                 Console.WriteLine("Login function");
                 /// Retriving url,Browser,credential values from the Environment values
 
-                String baseURL = ConfigurationManager.AppSettings[URL];
-                String companyId = ConfigurationManager.AppSettings[CompanyId];
-                String Username = ConfigurationManager.AppSettings[Uname];
-                String Password = ConfigurationManager.AppSettings[Pwd];
-                String Browser = ConfigurationManager.AppSettings[browser];
-                String client = ConfigurationManager.AppSettings[Client];
+                string baseURL = ConfigurationManager.AppSettings[URL];
+                string companyId = ConfigurationManager.AppSettings[CompanyId];
+                string Username = ConfigurationManager.AppSettings[Uname];
+                string Password = ConfigurationManager.AppSettings[Pwd];
+                string Browser = ConfigurationManager.AppSettings[browser];
+                string client = ConfigurationManager.AppSettings[Client];
 
                 driver = getBrowser(Browser);
                 Console.WriteLine("values  are " + companyId + Username + Password);
@@ -71,8 +71,41 @@ namespace CXAPortal.Utility_Scripts
                 //Capture_Screenshot("Error_Login", "fail", e.Message);
             }
         }
+        public static void CXAEmpLogin(string URL, string CompanyId, string Uname, string Pwd, string browser)
+        {
+            try
+            {
+                Console.WriteLine("Login function");
+                /// Retriving url,Browser,credential values from the Environment values
 
-        public static void Logout()
+                string baseURL = ConfigurationManager.AppSettings[URL];
+                string companyId = ConfigurationManager.AppSettings[CompanyId];
+                string Username = ConfigurationManager.AppSettings[Uname];
+                string Password = ConfigurationManager.AppSettings[Pwd];
+                string Browser = ConfigurationManager.AppSettings[browser];
+                
+
+                driver = getBrowser(Browser);
+                Console.WriteLine("values  are " + companyId + Username + Password);
+                driver.Manage().Cookies.DeleteAllCookies();
+                driver.Manage().Window.Maximize();
+                driver.Navigate().GoToUrl(baseURL);
+                driver_wait(By.Id("clientName"));
+                SendKeys(By.Id("clientName"), companyId);
+                SendKeys(By.Id("username"), Username);
+                SendKeys(By.Id("password"), Password);
+                Click(By.XPath("//*[@id='root']/div/div[1]/div[1]/div[2]/form/div/button"));
+                driver_wait(By.LinkText("Visit Welness Shop"));
+                //Wait_Until("css", "#menubar");
+                Capture_Screenshot("Login", "Pass", "Login with " + Username + "  Successful");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                //Capture_Screenshot("Error_Login", "fail", e.Message);
+            }
+        }
+        public void Logout()
         {
             try
             {
@@ -82,9 +115,10 @@ namespace CXAPortal.Utility_Scripts
                     //Capture_Screenshot("Before_Logout");
                     driver.FindElement(By.XPath("//*[@id='menubar']/table/tbody/tr/td[2]/a[2]")).Click();
                     Thread.Sleep(4000);
+                    driver.Manage().Cookies.DeleteAllCookies();
                     //  DashboardMainPage.TakeScreenshot("After_Logout");
                 }
-                //  driver.Quit();
+                driver.Manage().Cookies.DeleteAllCookies();
             }
             catch (Exception e)
             {
@@ -102,8 +136,22 @@ namespace CXAPortal.Utility_Scripts
 
         public static void SendKeys(By by, String text)
         {
-                driver.FindElement(by).SendKeys(text);
+                driver.FindElement(by).SendKeys(text);            
             
+        }
+        public static void EnterDate(By by, String text)
+        {
+            driver.FindElement(by).SendKeys(text);
+            try
+            {
+                driver.FindElement(By.XPath("//*[@id='ui-datepicker-div']/div[2]/button[2]")).Click();
+                Thread.Sleep(2000);
+            }
+            catch (Exception e)
+            {
+
+            }
+
         }
 
         public static void Click(By by)
@@ -207,14 +255,7 @@ namespace CXAPortal.Utility_Scripts
         {
            
             driver_wait(By.XPath("//a[@rel='ProfileMenu']"));
-           /* driver.FindElement(By.CssSelector("img[alt=\"Start\"]")).Click();
-            //Driver.FindElement(By.Id("WinStartButton")).Click();
-            Thread.Sleep(2000);
-            IWebElement element = driver.FindElement(By.XPath("//a[contains(@href, '" + Clientname + "')]"));
-            ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(0," + element.Location.Y + ")");
-            IJavaScriptExecutor executor = (IJavaScriptExecutor)driver;
-            executor.ExecuteScript("arguments[0].click();", element);
-            //Wait_Until("Id", "NotitifcationBar");*/
+          
             Java_ClickElement("XPath", "//*[@id='WinStartButton']","XPath", "//a[contains(@href, '" + Clientname + "')]");
             driver_wait(By.XPath("//a[@rel='ProfileMenu']"));
         }
@@ -568,6 +609,13 @@ namespace CXAPortal.Utility_Scripts
                 Console.WriteLine("Element is visible");
                 return d.FindElement(by);
             });
+        }
+
+        public static string GetDate(string format)
+        {
+            DateTime todayDay = DateTime.Today;
+            string formattedDate = todayDay.ToString(format);
+            return formattedDate;
         }
 
     }
